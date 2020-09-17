@@ -30,15 +30,18 @@ def main(_argv):
     session = InteractiveSession(config=config)
     STRIDES, ANCHORS, NUM_CLASS, XYSCALE = utils.load_config(FLAGS)
     input_size = FLAGS.size
-    image_path = FLAGS.image
 
+    # Imagen desde un archivo
+    image_path = FLAGS.image
     original_image = cv2.imread(image_path)
+
+    # Imagen desde la camara
+    
+
     original_image = cv2.cvtColor(original_image, cv2.COLOR_BGR2RGB)
 
-    # image_data = utils.image_preprocess(np.copy(original_image), [input_size, input_size])
     image_data = cv2.resize(original_image, (input_size, input_size))
     image_data = image_data / 255.
-    # image_data = image_data[np.newaxis, ...].astype(np.float32)
 
     images_data = []
     for i in range(1):
@@ -68,6 +71,7 @@ def main(_argv):
             boxes = value[:, :, 0:4]
             pred_conf = value[:, :, 4:]
 
+    # Almacenamiento de las variables de las predicciones
     boxes, scores, classes, valid_detections = tf.image.combined_non_max_suppression(
         boxes=tf.reshape(boxes, (tf.shape(boxes)[0], -1, 1, 4)),
         scores=tf.reshape(
@@ -77,7 +81,9 @@ def main(_argv):
         iou_threshold=FLAGS.iou,
         score_threshold=FLAGS.score
     )
+    # Predicciones de las imagenes
     pred_bbox = [boxes.numpy(), scores.numpy(), classes.numpy(), valid_detections.numpy()]
+    # Se dibujan los resultados de la predicción
     image = utils.draw_bbox(original_image, pred_bbox)
     # image = utils.draw_bbox(image_data*255, pred_bbox)
     image = Image.fromarray(image.astype(np.uint8))
